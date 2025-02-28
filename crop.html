@@ -1,0 +1,199 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Crop Recommendation System</title>
+    <link rel="stylesheet" href="styles.css">
+    <style>
+        body {
+            font-family: 'Poppins', sans-serif;
+            background-image: url("crop2.webp");
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+        }
+        .container {
+            background: rgba(255, 255, 255, 0.9);
+            padding: 25px;
+            border-radius: 12px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+            width: 400px;
+            text-align: center;
+        }
+        h1 {
+            color: #2E7D32;
+            font-size: 24px;
+        }
+        p {
+            color: #555;
+            font-size: 14px;
+        }
+        form {
+            display: flex;
+            flex-direction: column;
+        }
+        label {
+            margin-top: 10px;
+            font-weight: bold;
+            color: #388E3C;
+        }
+        input, .range-input {
+            padding: 10px;
+            margin-top: 5px;
+            border: 2px solid #388E3C;
+            border-radius: 5px;
+            outline: none;
+            transition: all 0.3s ease-in-out;
+        }
+        input:focus {
+            border-color: #2E7D32;
+            box-shadow: 0 0 5px rgba(46, 125, 50, 0.5);
+        }
+        .range-label {
+            display: flex;
+            justify-content: space-between;
+            font-size: 14px;
+            color: #388E3C;
+        }
+        button {
+            margin-top: 15px;
+            padding: 12px;
+            border: none;
+            background: linear-gradient(135deg, #66BB6A, #43A047);
+            color: white;
+            font-size: 16px;
+            cursor: pointer;
+            border-radius: 6px;
+            transition: 0.3s;
+        }
+        button:hover {
+            background: linear-gradient(135deg, #388E3C, #2E7D32);
+        }
+        #result {
+            margin-top: 15px;
+            padding: 15px;
+            font-weight: bold;
+            color: white;
+            background: linear-gradient(135deg, #FF9800, #F57C00);
+            border-radius: 8px;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+            font-size: 18px;
+            display: none;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🌱 Crop Recommendation System 🌾</h1>
+        <p>Enter soil and weather parameters to get the best crop recommendations.</p>
+        <form id="cropForm">
+            <label for="nitrogen">Nitrogen Level (N):</label>
+            <input type="number" id="nitrogen" required>
+            <label for="nitrogenRange" class="range-label">0</label>
+            <input type="range" id="nitrogenRange" class="range-input" min="0" max="100" step="1" value="30">
+            <label for="phosphorus">Phosphorus Level (P):</label>
+            <input type="number" id="phosphorus" required>
+            <label for="phosphorusRange" class="range-label">0</label>
+            <input type="range" id="phosphorusRange" class="range-input" min="0" max="100" step="1" value="70">
+            <label for="potassium">Potassium Level (K):</label>
+            <input type="number" id="potassium" required>
+            <label for="potassiumRange" class="range-label">0</label>
+            <input type="range" id="potassiumRange" class="range-input" min="0" max="100" step="1" value="50">
+            <label for="temperature">Temperature (°C):</label>
+            <input type="number" id="temperature" step="0.1" required>
+            <label for="temperatureRange" class="range-label">15°C</label>
+            <input type="range" id="temperatureRange" class="range-input" min="10" max="40" step="0.1" value="25">
+            <label for="humidity">Humidity (%):</label>
+            <input type="number" id="humidity" step="0.1" required>
+            <label for="humidityRange" class="range-label">30%</label>
+            <input type="range" id="humidityRange" class="range-input" min="0" max="100" step="1" value="75">
+            <label for="ph">Soil pH Level:</label>
+            <input type="number" id="ph" step="0.1" required>
+            <label for="phRange" class="range-label">4.0</label>
+            <input type="range" id="phRange" class="range-input" min="4" max="9" step="0.1" value="6.5">
+            <label for="rainfall">Rainfall (mm):</label>
+            <input type="number" id="rainfall" required>
+            <label for="rainfallRange" class="range-label">0</label>
+            <input type="range" id="rainfallRange" class="range-input" min="0" max="300" step="10" value="100">
+            <button type="submit">🌾 Get Recommendation</button>
+        </form>
+        <div id="result"></div>
+    </div>
+
+    <script>
+        // Sync range sliders with number inputs
+        function syncRangeWithNumber(rangeId, numberId) {
+            const range = document.getElementById(rangeId);
+            const number = document.getElementById(numberId);
+            range.addEventListener("input", () => {
+                number.value = range.value;
+            });
+            number.addEventListener("input", () => {
+                range.value = number.value;
+            });
+        }
+
+        // Synchronize all ranges with the corresponding number inputs
+        syncRangeWithNumber("nitrogenRange", "nitrogen");
+        syncRangeWithNumber("phosphorusRange", "phosphorus");
+        syncRangeWithNumber("potassiumRange", "potassium");
+        syncRangeWithNumber("temperatureRange", "temperature");
+        syncRangeWithNumber("humidityRange", "humidity");
+        syncRangeWithNumber("phRange", "ph");
+        syncRangeWithNumber("rainfallRange", "rainfall");
+
+        document.getElementById("cropForm").addEventListener("submit", function(event) {
+            event.preventDefault();
+
+            let nitrogen = parseFloat(document.getElementById("nitrogen").value);
+            let phosphorus = parseFloat(document.getElementById("phosphorus").value);
+            let potassium = parseFloat(document.getElementById("potassium").value);
+            let temperature = parseFloat(document.getElementById("temperature").value);
+            let humidity = parseFloat(document.getElementById("humidity").value);
+            let ph = parseFloat(document.getElementById("ph").value);
+            let rainfall = parseFloat(document.getElementById("rainfall").value);
+
+            let cropData = {
+                "Rice": { "N": 30, "P": 70, "K": 6, "temp": 25, "humidity": 80, "ph": 5.5, "rainfall": 150 },
+                "Wheat": { "N": 20, "P": 50, "K": 6.5, "temp": 20, "humidity": 60, "ph": 6.5, "rainfall": 100 },
+                "Maize": { "N": 25, "P": 60, "K": 6, "temp": 28, "humidity": 70, "ph": 6, "rainfall": 80 },
+                "Cotton": { "N": 28, "P": 40, "K": 7.5, "temp": 30, "humidity": 50, "ph": 7.5, "rainfall": 80 },
+                "Tea": { "N": 18, "P": 85, "K": 5.5, "temp": 18, "humidity": 90, "ph": 5.5, "rainfall": 120 },
+                "Sugarcane": { "N": 26, "P": 75, "K": 6.5, "temp": 28, "humidity": 85, "ph": 6, "rainfall": 200 },
+                "Soybean": { "N": 22, "P": 65, "K": 6, "temp": 22, "humidity": 65, "ph": 6, "rainfall": 90 },
+                "Tomato": { "N": 20, "P": 55, "K": 5.8, "temp": 25, "humidity": 70, "ph": 5.8, "rainfall": 50 },
+                "Potato": { "N": 15, "P": 60, "K": 5.5, "temp": 15, "humidity": 75, "ph": 5.5, "rainfall": 70 },
+                "Barley": { "N": 18, "P": 45, "K": 5.8, "temp": 22, "humidity": 55, "ph": 6.2, "rainfall": 90 },
+                "Oats": { "N": 20, "P": 50, "K": 6, "temp": 18, "humidity": 65, "ph": 6.0, "rainfall": 100 },
+                "Peas": { "N": 22, "P": 55, "K": 6, "temp": 20, "humidity": 60, "ph": 6.2, "rainfall": 110 },
+            };
+
+            let recommendedCrop = "No suitable crop found. Try adjusting the inputs.";
+            let bestMatch = 0;
+            
+            for (let crop in cropData) {
+                let cropReqs = cropData[crop];
+                let matchScore = 0;
+                
+                // Compare each parameter
+                if (temperature >= cropReqs.temp) matchScore++;
+                if (humidity >= cropReqs.humidity) matchScore++;
+                if (ph >= cropReqs.ph) matchScore++;
+                if (rainfall >= cropReqs.rainfall) matchScore++;
+
+                if (matchScore >= bestMatch) {
+                    bestMatch = matchScore;
+                    recommendedCrop = crop;
+                }
+            }
+
+            let resultDiv = document.getElementById("result");
+            resultDiv.innerHTML = `<strong>Recommended Crop:</strong> ${recommendedCrop}`;
+            resultDiv.style.display = "block";
+        });
+    </script>
+</body>
+</html>
